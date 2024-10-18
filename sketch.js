@@ -1,3 +1,6 @@
+//
+// This code is dependent on the ChessBoard class, which is found in: chessboard.js
+//
 let chessBoard;
 
 function preload() {

@@ -1,6 +1,6 @@
-# Chess Board with FEN Input
+# Chess Board with FEN Input/Output
 
-This project is a simple chess board visualizer built using p5.js. It allows users to input a chess position using FEN (Forsyth-Edwards Notation) and displays the corresponding board layout. The project has been refactored to use a separate `ChessBoard` class for improved modularity and maintainability.
+This project is a simple chess board visualizer built using p5.js. It allows users to input a chess position using FEN (Forsyth-Edwards Notation) and displays the corresponding board layout. The FEN field is also updated when pieces are moved on the board.
 
 ## Features
 
@@ -24,7 +24,7 @@ To run this project on p5js.org, follow these steps:
 1. Go to [p5js.org](https://editor.p5js.org/)
 2. Create a new sketch
 3. Replace the contents of the `sketch.js` file in the p5.js Web Editor with the contents of the `sketch.js` file from this project
-4. Create a new file called `chessboard.js` and copy the contents of the `chessboard.js` file from this project into it
+4. Upload the files `chessboard.js` and `index.html` from this project to the p5.js Web Editor
 5. In the p5.js Web Editor, upload the files for each of the chess piece images (e.g., `white_pawn.png`, `dark_knight.png`, etc.) from this project
 6. Click the "Run" button in the p5.js Web Editor to start the sketch
 
@@ -50,9 +50,5 @@ Once the sketch is running:
 
 <img src="screenshot.png" alt="Chess Board" width="600" />
 
-## Future Improvements
 
-- Implement more advanced chess rules (e.g., castling, en passant)
-- Add a move history feature
-- Implement a simple AI for playing against the computer
 
