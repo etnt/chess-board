@@ -8,13 +8,15 @@ class ChessBoard {
     this.letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     this.numbers = ['1', '2', '3', '4', '5', '6', '7', '8'];
     this.reverseNumbers = this.numbers.slice().reverse();
-    this.fenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w";
+    this.fenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -";
     this.pieceImages = {};
     this.board = [];
     this.selectedPiece = null;
     this.selectedX = -1;
     this.selectedY = -1;
     this.activeColor = 'w';
+    this.enPassantTarget = '-';
+    this.lastMove = null;
   }
 
   preload() {
@@ -55,7 +57,7 @@ class ChessBoard {
   }
 
   parseFEN(fen) {
-    let [boardPart, colorPart] = fen.split(' ');
+    let [boardPart, colorPart, castlingPart, enPassantPart] = fen.split(' ');
     let board = [];
     let rows = boardPart.split('/');
     for (let row of rows) {
@@ -72,6 +74,7 @@ class ChessBoard {
       board.push(boardRow);
     }
     this.activeColor = colorPart || 'w';
+    this.enPassantTarget = enPassantPart || '-';
     return board;
   }
 
@@ -96,7 +99,7 @@ class ChessBoard {
       fen += "/";
     }
     fen = fen.slice(0, -1);
-    fen += " " + this.activeColor;
+    fen += " " + this.activeColor + " - " + this.enPassantTarget;
     return fen;
   }
 
@@ -193,6 +196,11 @@ class ChessBoard {
         if (Math.abs(dx) === 1 && dy === direction && targetPiece !== '') {
           return true;
         }
+        // En passant capture
+        if (Math.abs(dx) === 1 && dy === direction && targetPiece === '' &&
+            this.enPassantTarget === this.letters[toX] + (8 - toY)) {
+          return true;
+        }
         return false;
 
       case 'r':
@@ -239,10 +247,29 @@ class ChessBoard {
         }
       } else {
         if (this.isValidMove(this.selectedX, this.selectedY, x, y)) {
-          this.board[y][x] = this.selectedPiece;
-          this.board[this.selectedY][this.selectedX] = '';
+          let piece = this.selectedPiece;
+          let fromX = this.selectedX;
+          let fromY = this.selectedY;
+
+          // Handle en passant capture
+          if (piece.toLowerCase() === 'p' && Math.abs(x - fromX) === 1 && this.board[y][x] === '' &&
+              this.enPassantTarget === this.letters[x] + (8 - y)) {
+            this.board[fromY][x] = '';  // Remove the captured pawn
+          }
+
+          this.board[y][x] = piece;
+          this.board[fromY][fromX] = '';
+
+          // Set en passant target
+          if (piece.toLowerCase() === 'p' && Math.abs(fromY - y) === 2) {
+            this.enPassantTarget = this.letters[x] + (8 - (fromY + y) / 2);
+          } else {
+            this.enPassantTarget = '-';
+          }
+
           this.activeColor = this.activeColor === 'w' ? 'b' : 'w';
           this.fenPosition = this.boardToFEN();
+          this.lastMove = { from: { x: fromX, y: fromY }, to: { x, y } };
         }
         
         this.selectedPiece = null;
