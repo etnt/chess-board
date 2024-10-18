@@ -1,4 +1,6 @@
+
 class ChessBoard {
+
   constructor(startX, startY, squareSize) {
     this.startX = startX;
     this.startY = startY;
@@ -117,7 +119,7 @@ class ChessBoard {
         let atY = this.startY + y * this.squareSize;
         noStroke();
         square(atX, atY, this.squareSize);
-        
+
         if (x === this.selectedX && y === this.selectedY) {
           fill(255, 255, 0, 100);
           square(atX, atY, this.squareSize);
