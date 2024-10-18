@@ -111,7 +111,7 @@ class ChessBoard {
     }
   }
 
-  drawBoard(textSize) {
+  drawBoard(textSizeValue) {
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         this.flipColors(x, y);
@@ -129,7 +129,7 @@ class ChessBoard {
 
     let ty = 8;
     let atY = this.startY + ty * this.squareSize;
-    textSize(textSize);
+    textSize(textSizeValue);
     for (let x = 0; x < 8; x++) {
       let atX = this.startX + x * this.squareSize;
       this.flipColors(x, ty);
