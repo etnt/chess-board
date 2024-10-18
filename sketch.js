@@ -1,5 +1,6 @@
 let startX = 50;
 let startY = 50;
+let square_size = 60;
 
 let letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 let numbers = ['1', '2', '3', '4', '5', '6', '7', '8'];
@@ -11,6 +12,10 @@ let fenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"; // Default star
 let exampleFenPosition = "rnbqkb1r/ppp1pppp/5n2/3p5/2PP5/8/PP2PPPP/RNBQKBNR"
 
 let pieceImages = {};
+let board = [];
+let selectedPiece = null;
+let selectedX = -1;
+let selectedY = -1;
 
 // Create a dictionary where a FEN "character" points to the corresponding piece image.
 function preload() {
@@ -33,6 +38,7 @@ function preload() {
 function setup() {
   createCanvas(600, 600);
   createFenInput();
+  board = parseFEN(fenPosition);
 }
 
 // Create an input field where a new FEN string can be inserted
@@ -44,6 +50,10 @@ function createFenInput() {
   button.position(450, 10);
   button.mousePressed(() => {
     fenPosition = input.value();
+    board = parseFEN(fenPosition);
+    selectedPiece = null;
+    selectedX = -1;
+    selectedY = -1;
     redraw();
   });
 }
@@ -87,10 +97,33 @@ function parseFEN(fen) {
   return board;
 }
 
+// Convert the board array back to a FEN string
+function boardToFEN(board) {
+  let fen = "";
+  for (let row of board) {
+    let emptyCount = 0;
+    for (let cell of row) {
+      if (cell === '') {
+        emptyCount++;
+      } else {
+        if (emptyCount > 0) {
+          fen += emptyCount;
+          emptyCount = 0;
+        }
+        fen += cell;
+      }
+    }
+    if (emptyCount > 0) {
+      fen += emptyCount;
+    }
+    fen += "/";
+  }
+  return fen.slice(0, -1); // Remove the trailing slash
+}
+
 // Traverse the board and for each non-empty entry draw
 // the piece according to the FEN "character" in the entry.
 function draw_pieces(square_size) {
-  let board = parseFEN(fenPosition);
   for (let y = 0; y < 8; y++) {
     for (let x = 0; x < 8; x++) {
       let piece = board[y][x];
@@ -110,6 +143,12 @@ function draw_board(square_size, text_size) {
       atY = startY + y * square_size
       noStroke()
       square(atX, atY, square_size);
+      
+      // Highlight selected piece
+      if (x === selectedX && y === selectedY) {
+        fill(255, 255, 0, 100);
+        square(atX, atY, square_size);
+      }
     }
   }
 
@@ -137,8 +176,36 @@ function draw_board(square_size, text_size) {
   draw_pieces(square_size);
 }
 
+function mousePressed() {
+  let x = floor((mouseX - startX) / square_size);
+  let y = floor((mouseY - startY) / square_size);
+
+  if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+    if (selectedPiece === null) {
+      // Select a piece
+      if (board[y][x] !== '') {
+        selectedPiece = board[y][x];
+        selectedX = x;
+        selectedY = y;
+      }
+    } else {
+      // Move the selected piece
+      board[selectedY][selectedX] = '';
+      board[y][x] = selectedPiece;
+      selectedPiece = null;
+      selectedX = -1;
+      selectedY = -1;
+      
+      // Update FEN string
+      fenPosition = boardToFEN(board);
+      let input = select('input');
+      input.value(fenPosition);
+    }
+    redraw();
+  }
+}
+
 function draw() {
   background(255);
-  draw_board(60, 12)
-  noLoop()
+  draw_board(square_size, 12);
 }
