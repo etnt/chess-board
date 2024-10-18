@@ -6,16 +6,17 @@ let letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 let numbers = ['1', '2', '3', '4', '5', '6', '7', '8'];
 let reverse_numbers = numbers.slice().reverse();
 
-let fenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"; // Default starting position
+let fenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"; // Default starting position
 
 // Paste this FEN string into the input filed and press: "Update Board"
-let exampleFenPosition = "rnbqkb1r/ppp1pppp/5n2/3p5/2PP5/8/PP2PPPP/RNBQKBNR"
+let exampleFenPosition = "rnbqkb1r/ppp1pppp/5n2/3p5/2PP5/8/PP2PPPP/RNBQKBNR w"
 
 let pieceImages = {};
 let board = [];
 let selectedPiece = null;
 let selectedX = -1;
 let selectedY = -1;
+let activeColor = 'w'; // 'w' for White, 'b' for Black
 
 // Create a dictionary where a FEN "character" points to the corresponding piece image.
 function preload() {
@@ -79,8 +80,9 @@ function draw_piece(piece, x, y, square_size) {
 // Parse the given FEN string and produce a board array where
 // each entry either is empty or populated with a FEN "character".
 function parseFEN(fen) {
+  let [boardPart, colorPart] = fen.split(' ');
   let board = [];
-  let rows = fen.split('/');
+  let rows = boardPart.split('/');
   for (let row of rows) {
     let boardRow = [];
     for (let char of row) {
@@ -94,6 +96,7 @@ function parseFEN(fen) {
     }
     board.push(boardRow);
   }
+  activeColor = colorPart || 'w'; // Default to white if not specified
   return board;
 }
 
@@ -118,7 +121,9 @@ function boardToFEN(board) {
     }
     fen += "/";
   }
-  return fen.slice(0, -1); // Remove the trailing slash
+  fen = fen.slice(0, -1); // Remove the trailing slash
+  fen += " " + activeColor; // Add the active color
+  return fen;
 }
 
 // Traverse the board and for each non-empty entry draw
@@ -254,7 +259,9 @@ function mousePressed() {
   if (x >= 0 && x < 8 && y >= 0 && y < 8) {
     if (selectedPiece === null) {
       // Select a piece
-      if (board[y][x] !== '') {
+      if (board[y][x] !== '' && 
+          ((activeColor === 'w' && board[y][x].toUpperCase() === board[y][x]) ||
+           (activeColor === 'b' && board[y][x].toLowerCase() === board[y][x]))) {
         selectedPiece = board[y][x];
         selectedX = x;
         selectedY = y;
@@ -265,6 +272,9 @@ function mousePressed() {
         // Move the selected piece
         board[selectedY][selectedX] = '';
         board[y][x] = selectedPiece;
+
+        // Switch active color
+        activeColor = activeColor === 'w' ? 'b' : 'w';
 
         // Update FEN string
         fenPosition = boardToFEN(board);
