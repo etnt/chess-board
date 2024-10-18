@@ -18,6 +18,14 @@ To run this project on p5js.org, follow these steps:
 4. In the p5.js Web Editor, upload the files for each of the chess piece images (e.g., `white_pawn.png`, `dark_knight.png`, etc.) from this project
 5. Click the "Run" button in the p5.js Web Editor to start the sketch
 
+## Running the project in VSCode
+
+Follow this [instruction](https://p5js.org/tutorials/setting-up-your-environment/) on how to setup VSCode to run this code.
+Bascially:
+
+- Install the p5.vscode extension.
+- Click the _Go Live_ button in the bottom status bar to open your sketch in a browser.
+
 ## Usage
 
 Once the sketch is running:
