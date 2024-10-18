@@ -166,24 +166,31 @@ class ChessBoard {
 
   isValidMove(fromX, fromY, toX, toY) {
     let piece = this.board[fromY][fromX];
+    let targetPiece = this.board[toY][toX];
     let dx = toX - fromX;
     let dy = toY - fromY;
 
-    if (this.board[toY][toX] !== '' && this.board[toY][toX].toLowerCase() === piece.toLowerCase()) {
+    // Check if the target square has a piece of the same color
+    if (targetPiece !== '' && 
+        (piece.toLowerCase() === piece) === (targetPiece.toLowerCase() === targetPiece)) {
       return false;
     }
 
     switch (piece.toLowerCase()) {
       case 'p':
         let direction = piece === 'P' ? -1 : 1;
-        if (dx === 0 && dy === direction && this.board[toY][toX] === '') {
+        // Move forward
+        if (dx === 0 && dy === direction && targetPiece === '') {
           return true;
         }
-        if (dx === 0 && dy === 2 * direction && this.board[toY][toX] === '' && this.board[fromY + direction][fromX] === '' &&
+        // Initial two-square move
+        if (dx === 0 && dy === 2 * direction && targetPiece === '' && 
+            this.board[fromY + direction][fromX] === '' &&
             ((piece === 'P' && fromY === 6) || (piece === 'p' && fromY === 1))) {
           return true;
         }
-        if (Math.abs(dx) === 1 && dy === direction && this.board[toY][toX] !== '') {
+        // Capture diagonally
+        if (Math.abs(dx) === 1 && dy === direction && targetPiece !== '') {
           return true;
         }
         return false;
