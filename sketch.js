@@ -176,6 +176,77 @@ function draw_board(square_size, text_size) {
   draw_pieces(square_size);
 }
 
+function isPathClear(fromX, fromY, toX, toY) {
+  let dx = Math.sign(toX - fromX);
+  let dy = Math.sign(toY - fromY);
+  let x = fromX + dx;
+  let y = fromY + dy;
+
+  while (x !== toX || y !== toY) {
+    if (board[y][x] !== '') {
+      return false;
+    }
+    x += dx;
+    y += dy;
+  }
+
+  return true;
+}
+
+function isValidMove(fromX, fromY, toX, toY) {
+  let piece = board[fromY][fromX];
+  let dx = toX - fromX;
+  let dy = toY - fromY;
+
+  // Check if the destination square is occupied by a piece of the same color
+  if (board[toY][toX] !== '' && board[toY][toX].toLowerCase() === piece.toLowerCase()) {
+    return false;
+  }
+
+  switch (piece.toLowerCase()) {
+    case 'p': // Pawn
+      let direction = piece === 'P' ? -1 : 1;
+      if (dx === 0 && dy === direction && board[toY][toX] === '') {
+        return true;
+      }
+      if (dx === 0 && dy === 2 * direction && board[toY][toX] === '' && board[fromY + direction][fromX] === '' &&
+          ((piece === 'P' && fromY === 6) || (piece === 'p' && fromY === 1))) {
+        return true;
+      }
+      if (Math.abs(dx) === 1 && dy === direction && board[toY][toX] !== '') {
+        return true;
+      }
+      return false;
+
+    case 'r': // Rook
+      if (dx === 0 || dy === 0) {
+        return isPathClear(fromX, fromY, toX, toY);
+      }
+      return false;
+
+    case 'n': // Knight
+      return (Math.abs(dx) === 2 && Math.abs(dy) === 1) || (Math.abs(dx) === 1 && Math.abs(dy) === 2);
+
+    case 'b': // Bishop
+      if (Math.abs(dx) === Math.abs(dy)) {
+        return isPathClear(fromX, fromY, toX, toY);
+      }
+      return false;
+
+    case 'q': // Queen
+      if (dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy)) {
+        return isPathClear(fromX, fromY, toX, toY);
+      }
+      return false;
+
+    case 'k': // King
+      return Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+
+    default:
+      return false;
+  }
+}
+
 function mousePressed() {
   let x = floor((mouseX - startX) / square_size);
   let y = floor((mouseY - startY) / square_size);
@@ -189,17 +260,22 @@ function mousePressed() {
         selectedY = y;
       }
     } else {
-      // Move the selected piece
-      board[selectedY][selectedX] = '';
-      board[y][x] = selectedPiece;
+      // Check if the move is valid
+      if (isValidMove(selectedX, selectedY, x, y)) {
+        // Move the selected piece
+        board[selectedY][selectedX] = '';
+        board[y][x] = selectedPiece;
+
+        // Update FEN string
+        fenPosition = boardToFEN(board);
+        let input = select('input');
+        input.value(fenPosition);
+      }
+      
+      // Reset selection
       selectedPiece = null;
       selectedX = -1;
       selectedY = -1;
-      
-      // Update FEN string
-      fenPosition = boardToFEN(board);
-      let input = select('input');
-      input.value(fenPosition);
     }
     redraw();
   }
@@ -208,4 +284,5 @@ function mousePressed() {
 function draw() {
   background(255);
   draw_board(square_size, 12);
+  noLoop()
 }
